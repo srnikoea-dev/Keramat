@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>UH Guru</title>
+<style>
+:root{--bg:#f2f6f4;--card:#fff;--ink:#12261f;--mute:#5b6f67;--line:#cfdcd6;--acc:#0b7a5f;--accd:#075a46;--bad:#b3261e;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1a16;--card:#17261f;--ink:#e6f1ec;--mute:#9db3a9;--line:#2c4238;--acc:#3fc9a2;--accd:#6fe0bf;--bad:#ff8a80;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.6rem;margin:8px 0 2px;letter-spacing:-.01em}
+h2{font-size:1.05rem;margin:0 0 10px}
+.sub{color:var(--mute);margin:0 0 16px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input,textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.row{display:flex;gap:8px;align-items:end}.row>*{flex:1}.row>.fix{flex:none}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:11px 16px;background:var(--acc);color:#fff;cursor:pointer}
+@media(prefers-color-scheme:dark){button{color:#06231a}}
+button.alt{background:transparent;color:var(--accd);border:1px solid var(--acc)}
+button.del{background:transparent;color:var(--bad);padding:4px 8px}
+.tok{font:700 1.5rem ui-monospace,Consolas,monospace;letter-spacing:.2em;text-align:center}
+ol{padding-left:20px;margin:0}li{margin:0 0 10px}
+li small{display:block;color:var(--mute)}
+.ok{color:var(--accd);font-weight:600}.empty{color:var(--mute);margin:0}
+#msg{min-height:1.4em;margin-top:8px;font-weight:600}.err{color:var(--bad)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+</style></head><body><main>
+<h1>UH Guru</h1><p class="sub">Buat soal pilihan ganda, atur token, lalu bagikan file soal ke siswa.</p>
+
+<section><h2>Informasi ujian</h2>
+<label for="judul">Judul ujian</label><input id="judul" placeholder="Contoh: UH Matematika Bab 3">
+<label for="token">Token</label>
+<div class="row"><input id="token" class="tok" maxlength="12" inputmode="numeric" placeholder="123456"><button class="alt fix" id="acak" type="button">Acak token</button></div>
+</section>
+
+<section><h2>Tambah soal</h2>
+<label for="q">Pertanyaan</label><textarea id="q" rows="3"></textarea>
+<label for="a">Pilihan A</label><input id="a"><label for="b">Pilihan B</label><input id="b">
+<label for="c">Pilihan C</label><input id="c"><label for="d">Pilihan D</label><input id="d">
+<label for="kunci">Kunci jawaban</label>
+<select id="kunci"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select>
+<div class="btns"><button id="tambah" type="button">Tambah soal</button></div>
+</section>
+
+<section><h2>Daftar soal (<span id="n">0</span>)</h2>
+<p class="empty" id="kosong">Belum ada soal. Isi formulir di atas lalu pilih Tambah soal.</p>
+<ol id="list"></ol></section>
+
+<section><h2>Simpan file soal</h2>
+<div class="btns"><button id="simpan" type="button">Simpan file JSON</button><button class="alt" id="bagi" type="button">Bagikan</button><button class="alt" id="reset" type="button">Hapus semua</button></div>
+<div id="msg" role="status"></div></section>
+</main>
+<script>
+function sha256(s){var m=Math,P=m.pow,l=P(2,32),i,j,r='',w=[],L=s.length*8,h=[],k=[],p=0,c={};s=unescape(encodeURIComponent(s));L=s.length*8;
+for(var n=2;p<64;n++)if(!c[n]){for(i=0;i<313;i+=n)c[i]=n;h[p]=(P(n,.5)*l)|0;k[p++]=(P(n,1/3)*l)|0}
+s+='\x80';while(s.length%64-56)s+='\x00';
+for(i=0;i<s.length;i++){j=s.charCodeAt(i);w[i>>2]|=j<<((3-i)%4)*8}
+w[w.length]=(L/l)|0;w[w.length]=L;
+for(j=0;j<w.length;){var u=w.slice(j,j+=16),o=h;h=h.slice(0,8);
+for(i=0;i<64;i++){var a=u[i-15],e=u[i-2],A=h[0],E=h[4],
+t=h[7]+(((E>>>6)|(E<<26))^((E>>>11)|(E<<21))^((E>>>25)|(E<<7)))+((E&h[5])^(~E&h[6]))+k[i]+(u[i]=i<16?u[i]:(u[i-16]+(((a>>>7)|(a<<25))^((a>>>18)|(a<<14))^(a>>>3))+u[i-7]+(((e>>>17)|(e<<15))^((e>>>19)|(e<<13))^(e>>>10)))|0);
+h=[(t+(((A>>>2)|(A<<30))^((A>>>13)|(A<<19))^((A>>>22)|(A<<10)))+((A&h[1])^(A&h[2])^(h[1]&h[2])))|0].concat(h);h[4]=(h[4]+t)|0}
+for(i=0;i<8;i++)h[i]=(h[i]+o[i])|0}
+for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(h[i]>>(j*8))&255;r+=((b<16)?0:'')+b.toString(16)}return r}
+var $=function(i){return document.getElementById(i)},soal=[];
+function msg(t,e){$('msg').textContent=t;$('msg').className=e?'err':'ok'}
+function save(){try{localStorage.setItem('uhguru',JSON.stringify({soal:soal,judul:$('judul').value,token:$('token').value}))}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem('uhguru')||'null');if(d){soal=d.soal||[];$('judul').value=d.judul||'';$('token').value=d.token||''}}catch(e){}}
+function render(){var ol=$('list');ol.innerHTML='';$('n').textContent=soal.length;$('kosong').style.display=soal.length?'none':'';
+soal.forEach(function(s,i){var li=document.createElement('li');var t=document.createElement('div');t.textContent=s.q;
+var sm=document.createElement('small');sm.textContent='Kunci: '+s.kunci.toUpperCase()+' \u2013 '+s[s.kunci];
+var b=document.createElement('button');b.className='del';b.type='button';b.textContent='Hapus';b.onclick=function(){soal.splice(i,1);save();render()};
+li.appendChild(t);li.appendChild(sm);li.appendChild(b);ol.appendChild(li)});save()}
+$('acak').onclick=function(){$('token').value=String(Math.floor(100000+Math.random()*900000));save()};
+$('token').oninput=$('judul').oninput=save;
+$('tambah').onclick=function(){var s={q:$('q').value.trim(),a:$('a').value.trim(),b:$('b').value.trim(),c:$('c').value.trim(),d:$('d').value.trim(),kunci:$('kunci').value};
+if(!s.q||!s.a||!s.b||!s.c||!s.d){msg('Isi pertanyaan dan keempat pilihan terlebih dahulu.',1);return}
+soal.push(s);['q','a','b','c','d'].forEach(function(k){$(k).value=''});msg('Soal ditambahkan.');render();$('q').focus()};
+$('reset').onclick=function(){if(soal.length&&confirm('Hapus semua soal?')){soal=[];render();msg('Semua soal dihapus.')}};
+function build(){var j=$('judul').value.trim(),t=$('token').value.trim();
+if(!j){msg('Isi judul ujian terlebih dahulu.',1);return null}
+if(!t){msg('Isi token atau pilih Acak token.',1);return null}
+if(!soal.length){msg('Tambahkan minimal satu soal.',1);return null}
+var salt=Math.random().toString(36).slice(2,10);
+return{judul:j,salt:salt,tokenHash:sha256(t+'|'+salt),soal:soal}}
+function nama(j){return j.judul.replace(/[^\w\-]+/g,'_')+'.json'}
+$('simpan').onclick=function(){var o=build();if(!o)return;var isi=JSON.stringify(o,null,1),file=nama(o);
+if(window.AndroidBridge&&AndroidBridge.saveJson){AndroidBridge.saveJson(isi,file);msg('Pilih lokasi penyimpanan file soal. Token: '+$('token').value.trim()+'. Berikan token ini ke siswa.');return}
+var b=new Blob([isi],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=file;document.body.appendChild(a);a.click();a.remove();msg('File '+file+' disimpan. Token: '+$('token').value.trim()+'. Berikan token ini ke siswa.')};
+$('bagi').onclick=function(){var o=build();if(!o)return;var f=new File([JSON.stringify(o,null,1)],nama(o),{type:'application/json'});
+if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:o.judul}).then(function(){msg('File dibagikan. Token: '+$('token').value.trim())}).catch(function(){})}
+else msg('Fitur bagikan tidak tersedia di perangkat ini. Gunakan Simpan file JSON.',1)};
+load();render();
+</script></body></html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>UH Siswa</title>
+<style>
+:root{--bg:#f3f4fb;--card:#fff;--ink:#16193a;--mute:#5d6288;--line:#d2d5ea;--acc:#3a46c4;--accd:#2a34a0;--ok:#16794a;--bad:#b3261e;--okbg:#e2f5ea;--badbg:#fde8e6;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#10112a;--card:#1a1c3d;--ink:#e8e9fb;--mute:#a4a8d0;--line:#34376b;--acc:#8c97ff;--accd:#b3bbff;--ok:#6fe0a4;--bad:#ff8a80;--okbg:#12362a;--badbg:#431a18;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:600px;margin:0 auto;padding:16px}
+h1{font-size:1.6rem;margin:8px 0 2px;letter-spacing:-.01em}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+label{display:block;font-weight:600;font-size:.9rem;margin:12px 0 4px}
+input[type=text],input[type=password],input[type=file]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+input:focus,button:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:12px 16px;background:var(--acc);color:#fff;cursor:pointer;width:100%;margin-top:14px}
+@media(prefers-color-scheme:dark){button{color:#0d0e2a}}
+button.alt{background:transparent;color:var(--accd);border:1px solid var(--acc)}
+.opt{display:block;text-align:left;font-weight:400;background:var(--bg);color:var(--ink);border:1px solid var(--line);margin-top:8px}
+.opt b{display:inline-block;width:1.6em;color:var(--accd)}
+.opt.sel{border-color:var(--acc);box-shadow:inset 0 0 0 2px var(--acc)}
+.top{display:flex;justify-content:space-between;color:var(--mute);font-weight:600;margin-bottom:6px}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-bottom:14px}.bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.q{font-size:1.15rem;font-weight:600;margin:0 0 6px}
+.skor{font-size:3rem;font-weight:800;margin:0;letter-spacing:-.02em}
+.rv{border-left:4px solid var(--line);padding:6px 10px;margin:10px 0;border-radius:4px}
+.rv.ok{background:var(--okbg);border-color:var(--ok)}.rv.no{background:var(--badbg);border-color:var(--bad)}
+.err{color:var(--bad);font-weight:600;margin:10px 0 0}.hide{display:none}
+</style></head><body><main>
+<h1>UH Siswa</h1><p class="sub" id="sub">Buka file soal dari guru dan masukkan token untuk mulai.</p>
+
+<div class="card" id="v1">
+<label for="file">File soal (.json)</label><input type="file" id="file" accept=".json,application/json">
+<label for="token">Token dari guru</label><input type="password" id="token" inputmode="numeric" autocomplete="off">
+<label for="nama">Nama kamu</label><input type="text" id="nama" autocomplete="off">
+<button id="buka" type="button">Buka soal</button><p class="err" id="err" role="alert"></p></div>
+
+<div class="card hide" id="v2">
+<div class="top"><span id="nomor"></span><span id="jdl"></span></div><div class="bar"><i id="prog"></i></div>
+<p class="q" id="tanya"></p><div id="opsi"></div>
+<button id="lanjut" type="button" disabled>Lanjut</button></div>
+
+<div class="card hide" id="v3">
+<p class="sub" id="who"></p><p class="skor" id="skor"></p><p class="sub" id="ket"></p>
+<div id="rev"></div><button class="alt" id="ulang" type="button">Tutup dan buka file lain</button></div>
+</main>
+<script>
+function sha256(s){var m=Math,P=m.pow,l=P(2,32),i,j,r='',w=[],L=s.length*8,h=[],k=[],p=0,c={};s=unescape(encodeURIComponent(s));L=s.length*8;
+for(var n=2;p<64;n++)if(!c[n]){for(i=0;i<313;i+=n)c[i]=n;h[p]=(P(n,.5)*l)|0;k[p++]=(P(n,1/3)*l)|0}
+s+='\x80';while(s.length%64-56)s+='\x00';
+for(i=0;i<s.length;i++){j=s.charCodeAt(i);w[i>>2]|=j<<((3-i)%4)*8}
+w[w.length]=(L/l)|0;w[w.length]=L;
+for(j=0;j<w.length;){var u=w.slice(j,j+=16),o=h;h=h.slice(0,8);
+for(i=0;i<64;i++){var a=u[i-15],e=u[i-2],A=h[0],E=h[4],
+t=h[7]+(((E>>>6)|(E<<26))^((E>>>11)|(E<<21))^((E>>>25)|(E<<7)))+((E&h[5])^(~E&h[6]))+k[i]+(u[i]=i<16?u[i]:(u[i-16]+(((a>>>7)|(a<<25))^((a>>>18)|(a<<14))^(a>>>3))+u[i-7]+(((e>>>17)|(e<<15))^((e>>>19)|(e<<13))^(e>>>10)))|0);
+h=[(t+(((A>>>2)|(A<<30))^((A>>>13)|(A<<19))^((A>>>22)|(A<<10)))+((A&h[1])^(A&h[2])^(h[1]&h[2])))|0].concat(h);h[4]=(h[4]+t)|0}
+for(i=0;i<8;i++)h[i]=(h[i]+o[i])|0}
+for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(h[i]>>(j*8))&255;r+=((b<16)?0:'')+b.toString(16)}return r}
+var $=function(i){return document.getElementById(i)},data=null,i=0,jaw=[];
+function show(v){['v1','v2','v3'].forEach(function(x){$(x).classList.toggle('hide',x!==v)})}
+function err(t){$('err').textContent=t}
+$('buka').onclick=function(){err('');var f=$('file').files[0],t=$('token').value.trim();
+if(!f){err('Pilih file soal terlebih dahulu.');return}
+if(!t){err('Masukkan token dari guru.');return}
+if(!$('nama').value.trim()){err('Isi nama kamu.');return}
+var r=new FileReader();r.onload=function(){var d;try{d=JSON.parse(r.result)}catch(e){err('File tidak valid. Pastikan file berasal dari UH Guru.');return}
+if(!d||!d.tokenHash||!d.salt||!Array.isArray(d.soal)||!d.soal.length){err('Format file tidak dikenali.');return}
+if(sha256(t+'|'+d.salt)!==d.tokenHash){err('Token salah. Periksa kembali token dari guru.');return}
+data=d;i=0;jaw=[];tampil();show('v2')};
+r.onerror=function(){err('File tidak bisa dibaca.')};r.readAsText(f)};
+function tampil(){var s=data.soal[i];$('nomor').textContent='Soal '+(i+1)+' dari '+data.soal.length;$('jdl').textContent=data.judul;
+$('prog').style.width=(i/data.soal.length*100)+'%';$('tanya').textContent=s.q;var o=$('opsi');o.innerHTML='';
+['a','b','c','d'].forEach(function(k){var b=document.createElement('button');b.type='button';b.className='opt';
+var l=document.createElement('b');l.textContent=k.toUpperCase();b.appendChild(l);b.appendChild(document.createTextNode(s[k]));
+b.onclick=function(){jaw[i]=k;[].forEach.call(o.children,function(c){c.classList.remove('sel')});b.classList.add('sel');$('lanjut').disabled=false};o.appendChild(b)});
+$('lanjut').disabled=true;$('lanjut').textContent=i===data.soal.length-1?'Selesai':'Lanjut'}
+$('lanjut').onclick=function(){if(i<data.soal.length-1){i++;tampil()}else hasil()};
+function hasil(){var b=0,rv=$('rev');rv.innerHTML='';
+data.soal.forEach(function(s,n){var ok=jaw[n]===s.kunci;if(ok)b++;var d=document.createElement('div');d.className='rv '+(ok?'ok':'no');
+d.textContent=(n+1)+'. '+s.q+' \u2013 Jawabanmu: '+jaw[n].toUpperCase()+(ok?' (benar)':' (salah, kunci: '+s.kunci.toUpperCase()+')');rv.appendChild(d)});
+var nilai=Math.round(b/data.soal.length*100);$('who').textContent=$('nama').value.trim()+' \u2013 '+data.judul;
+$('skor').textContent=nilai;$('ket').textContent=b+' benar dari '+data.soal.length+' soal';show('v3')}
+$('ulang').onclick=function(){data=null;$('token').value='';$('file').value='';show('v1')};
+</script></body></html>
